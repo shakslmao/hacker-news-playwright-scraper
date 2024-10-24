@@ -22,7 +22,11 @@ jobs:
               with:
                   node-version: "18"
             - name: Install dependencies
-              run: npm install
+              run: |
+                  npm install
+                  npm install commander
+                  npm install pdfkit
+                  npx playwright install
             - name: Run Playwright Tests
               env:
                   HN_USERNAME: ${{ secrets.HN_USERNAME }}
