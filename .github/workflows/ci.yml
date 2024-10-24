@@ -1,5 +1,4 @@
 name: Playwright Tests
-
 on:
     push:
         branches:
@@ -7,34 +6,31 @@ on:
     pull_request:
         branches:
             - main
-
 jobs:
     test:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                browser: [chromium, firefox, webkit] # Run tests on different browsers
-                trace: [false, true] # Toggle tracing on/off
-                auth: [false, true] # Toggle authentication on/off
-
+                browser: [chromium, firefox, webkit]
+                trace: [false, true]
+                auth: [false, true]
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
-
             - name: Set up Node.js
               uses: actions/setup-node@v2
               with:
                   node-version: "18"
-
             - name: Install dependencies
               run: npm install
-
             - name: Run Playwright Tests
+              env:
+                  HN_USERNAME: ${{ secrets.HN_USERNAME }}
+                  HN_PASSWORD: ${{ secrets.HN_PASSWORD }}
               run: |
                   node index.js --pages 5 --browser ${{ matrix.browser }} \
                   ${{ matrix.trace && '--trace' || '' }} \
-                  ${{ matrix.auth && '--auth --username ${{ secrets.HN_USERNAME }} --password ${{ secrets.HN_PASSWORD }}' || '' }}
-
+                  ${{ matrix.auth && '--auth --username "$HN_USERNAME" --password "$HN_PASSWORD"' || '' }}
             - name: Upload screenshots and traces if tests fail
               if: failure()
               uses: actions/upload-artifact@v3
@@ -43,7 +39,6 @@ jobs:
                   path: |
                       ./screenshots/
                       ./traces/
-
             - name: Upload PDF report
               uses: actions/upload-artifact@v3
               with:
