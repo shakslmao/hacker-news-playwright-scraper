@@ -1,0 +1,9 @@
+// Define command-line options
+// node index.js --pages 5
+// node index.js --pages 5 --trace
+// node index.js --pages 5 --trace --browser firefox
+
+// With Authentication
+// node index.js --pages 5 --auth --username testusernamelol --password password --auth
+// node index.js --pages 5 --auth --username testusernamelol --password password --auth --trace
+// node index.js --pages 5 --auth --username testusernamelol --password password --auth --trace --browser firefox
