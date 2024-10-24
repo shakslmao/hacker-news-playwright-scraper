@@ -31,7 +31,7 @@ async function sortHackerNewsArticles(browserType, trace, authenticated, totalPa
         : browserType === "firefox"
         ? firefox
         : webkit
-    ).launch({ headless: false });
+    ).launch({ headless: true }); // Set to true for CI/CD for performance
 
     const context = await browser.newContext();
 
@@ -219,3 +219,5 @@ async function logIntoHackerNews(context, username, password, browserType = "chr
         console.error(`Error during test: ${e.message}`);
     }
 })();
+
+module.exports = { sortHackerNewsArticles, validateSorting, logIntoHackerNews };
