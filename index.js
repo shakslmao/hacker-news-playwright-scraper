@@ -1,4 +1,3 @@
-require("dotenv").config();
 const fs = require("fs");
 const { chromium, firefox, webkit } = require("playwright");
 const { expect } = require("@playwright/test");
