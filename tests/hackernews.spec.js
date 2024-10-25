@@ -38,6 +38,9 @@ test.describe("Hacker News Article Sorting", () => {
         expect(isSorted).toBeTruthy();
     });
 
+    /**
+     * Note: The following test is commented out because it requires reCAPTCHA
+    /*
     // Test the authentication feature using environment variables for login
     test("should handle authentication correctly", async ({ browser }) => {
         const username = process.env.HNEWSUSER;
@@ -50,6 +53,7 @@ test.describe("Hacker News Article Sorting", () => {
         // Assert that articles are retrieved when authentication is successful
         expect(articlesToValidate.length).toBeGreaterThan(0);
     });
+    */
 
     // Test to simulate network failure and ensure the error is handled gracefully
     test("should handle network errors gracefully", async ({ page }) => {

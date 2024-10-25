@@ -9,6 +9,7 @@ const { chromium, firefox, webkit } = require("playwright");
 const { expect } = require("@playwright/test");
 const { program } = require("commander");
 const { generatePDFReport } = require("./generateReport");
+const cookies = require("./cookies.json");
 
 // Set up command-line options for the script, including username, password, browser type, number of pages to scrape, and other options
 program
@@ -40,7 +41,7 @@ async function sortHackerNewsArticles(browserType, trace, authenticated, totalPa
         : browserType === "firefox"
         ? firefox
         : webkit
-    ).launch({ headless: true }); // Launch browser in headless mode, which is recommended for CI/CD for performance
+    ).launch({ headless: false });
 
     const context = await browser.newContext(); // Create a new browser context
 
@@ -49,6 +50,7 @@ async function sortHackerNewsArticles(browserType, trace, authenticated, totalPa
 
     // Log in to Hacker News if authentication is required
     if (authenticated) {
+        // await context.addCookies(cookies); // Add cookies to the context for authentication
         const loginSuccess = await logIntoHackerNews(
             context,
             options.username,
@@ -197,6 +199,7 @@ function validateSorting(articles) {
     return true; // Return true if all articles are correctly sorted
 }
 
+/*
 // Function to log in to Hacker News using the provided username and password
 async function logIntoHackerNews(context, username, password, browserType = "chromium") {
     const page = await context.newPage(); // Open a new page
@@ -245,6 +248,85 @@ async function logIntoHackerNews(context, username, password, browserType = "chr
     } else {
         console.error("Login failed: Logout link not found.");
         await page.screenshot({ path: `${screenshotsDir}/login-error-${browserType}.png` });
+        await page.close();
+        return false;
+    }
+}
+*/
+
+// Amended function to handle reCAPTCHA verification
+async function logIntoHackerNews(context, username, password, browserType = "chromium") {
+    const page = await context.newPage();
+
+    try {
+        await page.goto("https://news.ycombinator.com/login?goto=newest");
+
+        if (!username || !password) {
+            console.error("Username and password must be provided via command-line arguments.");
+            await page.close();
+            return false;
+        }
+
+        await page.fill('input[name="acct"]', username);
+        await page.fill('input[name="pw"]', password);
+        await page.click('input[type="submit"]');
+
+        try {
+            const recaptchaFrame = await page.waitForSelector('iframe[title*="reCAPTCHA"]', {
+                timeout: 5000,
+            });
+
+            if (recaptchaFrame) {
+                console.log("reCAPTCHA detected. Waiting for manual interaction...");
+
+                await page.screenshot({
+                    path: `${screenshotsDir}/recaptcha-${browserType}.png`,
+                });
+
+                try {
+                    await page.waitForSelector('a[id="logout"]', {
+                        timeout: 60000,
+                    });
+                    console.log("Manual reCAPTCHA verification successful.");
+                } catch (timeoutError) {
+                    console.error("Timeout waiting for reCAPTCHA verification.");
+                    await page.screenshot({
+                        path: `${screenshotsDir}/recaptcha-timeout-${browserType}.png`,
+                    });
+                    await page.close();
+                    return false;
+                }
+            }
+        } catch (noRecaptchaError) {
+            const loginError = await page.$('body:has-text("Bad login.")');
+            if (loginError) {
+                console.error("Login failed: Bad login credentials.");
+                await page.close();
+                return false;
+            }
+        }
+
+        const loggedIn = await page.$('a[id="logout"]');
+        if (loggedIn) {
+            console.log("Login successful.");
+            await page.screenshot({
+                path: `${screenshotsDir}/post-login-${browserType}.png`,
+            });
+            await page.close();
+            return true;
+        } else {
+            console.error("Login failed: Unable to verify successful login.");
+            await page.screenshot({
+                path: `${screenshotsDir}/login-error-${browserType}.png`,
+            });
+            await page.close();
+            return false;
+        }
+    } catch (error) {
+        console.error("Login process failed:", error.message);
+        await page.screenshot({
+            path: `${screenshotsDir}/login-exception-${browserType}.png`,
+        });
         await page.close();
         return false;
     }
