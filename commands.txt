@@ -7,3 +7,4 @@
 // node index.js --pages 5 --auth --username <username> --password <password> --auth
 // node index.js --pages 5 --auth --username <username> --password <password> --auth --trace
 // node index.js --pages 5 --auth --username <username> --password <password> --auth --trace --browser firefox
+
