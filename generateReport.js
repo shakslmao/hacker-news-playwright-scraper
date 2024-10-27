@@ -9,6 +9,7 @@ const path = require("path");
  * @param {string} tracesDir - Directory containing trace files
  * @param {string} pdfPath - Output path for the PDF file
  */
+
 function generatePDFReport(results, screenshotsDir, tracesDir, pdfPath) {
     // Initialize PDF document
     const doc = new PDFDocument({
@@ -30,7 +31,6 @@ function generatePDFReport(results, screenshotsDir, tracesDir, pdfPath) {
             .fontSize(12);
     };
 
-    // Helper function to add key-value pairs
     const addKeyValue = (key, value) => {
         doc.text(`${key}: `, {
             continued: true,
@@ -67,7 +67,6 @@ function generatePDFReport(results, screenshotsDir, tracesDir, pdfPath) {
     // Test Results
     addSectionHeader("Test Results");
 
-    // Determine overall status based on sorting validation and errors
     const testPassed = results.isSorted && (!results.errors || results.errors.length === 0);
     const statusColor = testPassed ? "#27ae60" : "#c0392b";
     doc.fillColor(statusColor)
@@ -123,7 +122,7 @@ function generatePDFReport(results, screenshotsDir, tracesDir, pdfPath) {
         align: "center",
     });
 
-    // Finalize the PDF
+    // Finalise the PDF
     doc.end();
     console.log(`PDF report generated successfully: ${pdfPath}`);
 }

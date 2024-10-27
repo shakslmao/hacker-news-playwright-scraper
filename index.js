@@ -1,7 +1,11 @@
 /**
  * @author Shaakir Akram
- * @description QA Wolf Take Home Assignment
- *  This script is designed to scrape articles from the Hacker News webssite and validate that they are sorted from newest to oldest.
+ * @description This script is designed to scrape articles from the Hacker News webssite and validate that they are sorted from newest to oldest,
+ */
+
+/**
+ * NOTE: If you run this file with Authentication, you will need to manually solve the reCAPTCHA challenge, so Run in Headless FALSE!
+ * There is Commands to run the file with Authentication and without Authentication in the commands.txt file & with credentials to log in.
  */
 
 const fs = require("fs");
@@ -9,7 +13,6 @@ const { chromium, firefox, webkit } = require("playwright");
 const { expect } = require("@playwright/test");
 const { program } = require("commander");
 const { generatePDFReport } = require("./generateReport");
-const cookies = require("./cookies.json");
 
 // Set up command-line options for the script, including username, password, browser type, number of pages to scrape, and other options
 program
@@ -41,7 +44,7 @@ async function sortHackerNewsArticles(browserType, trace, authenticated, totalPa
         : browserType === "firefox"
         ? firefox
         : webkit
-    ).launch({ headless: false });
+    ).launch({ headless: false }); // switch between for end to end testing, needed for recaptcha!
 
     const context = await browser.newContext(); // Create a new browser context
 
@@ -50,7 +53,6 @@ async function sortHackerNewsArticles(browserType, trace, authenticated, totalPa
 
     // Log in to Hacker News if authentication is required
     if (authenticated) {
-        // await context.addCookies(cookies); // Add cookies to the context for authentication
         const loginSuccess = await logIntoHackerNews(
             context,
             options.username,
@@ -198,61 +200,6 @@ function validateSorting(articles) {
     }
     return true; // Return true if all articles are correctly sorted
 }
-
-/*
-// Function to log in to Hacker News using the provided username and password
-async function logIntoHackerNews(context, username, password, browserType = "chromium") {
-    const page = await context.newPage(); // Open a new page
-    await page.goto("https://news.ycombinator.com/login?goto=newest"); // Navigate to the login page
-
-    // Ensure username and password are provided before attempting to log in
-    if (!username || !password) {
-        console.error("Username and password must be provided via command-line arguments.");
-        await page.close();
-        return false;
-    }
-
-    // Fill in the login form with the provided credentials
-    await page.fill('input[name="acct"]', username);
-    await page.fill('input[name="pw"]', password);
-
-    // Submit the login form and wait for navigation
-    try {
-        await Promise.all([page.click('input[type="submit"]'), page.waitForNavigation()]);
-    } catch (e) {
-        console.error("Login failed during navigation:", e.message);
-        await page.screenshot({ path: `${screenshotsDir}/login-failure-${browserType}.png` }); // Capture screenshot on failure
-        await page.close();
-        return false;
-    }
-
-    // Capture a screenshot after successful login
-    await page.screenshot({ path: `${screenshotsDir}/post-login-${browserType}.png` });
-
-    // Check for login failure based on page content
-    const loginError = await page.$('body:has-text("Bad login.")');
-    if (loginError) {
-        console.error("Login failed: Bad login credentials.");
-        await page.close();
-        return false;
-    }
-
-    // Ensure the user is logged in by checking for the presence of a logout link
-    const loggedIn = await page.$('a[id="logout"]');
-    expect(loggedIn).not.toBeNull();
-
-    if (loggedIn) {
-        console.log("Login successful.");
-        await page.close();
-        return true; // Return true if login is successful
-    } else {
-        console.error("Login failed: Logout link not found.");
-        await page.screenshot({ path: `${screenshotsDir}/login-error-${browserType}.png` });
-        await page.close();
-        return false;
-    }
-}
-*/
 
 // Amended function to handle reCAPTCHA verification
 async function logIntoHackerNews(context, username, password, browserType = "chromium") {

@@ -1,10 +1,10 @@
 // Define command-line options [page number [x]]
-// node index.js --pages [x]
+// node index.js --pages <number>
 // node index.js --pages 5 --trace
-// node index.js --pages 5 --trace --browser firefox
+// node index.js --pages 5 --trace --browser <browser>
 
 // With Authentication
 // node index.js --pages 5 --auth --username <username> --password <password> --auth
 // node index.js --pages 5 --auth --username <username> --password <password> --auth --trace
-// node index.js --pages 5 --auth --username <username> --password <password> --auth --trace --browser firefox
+// node index.js --pages 5 --auth --username <username> --password <password> --auth --trace --browser <browser>
 
